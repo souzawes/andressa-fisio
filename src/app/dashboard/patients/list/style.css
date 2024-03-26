@@ -1,0 +1,5 @@
+.container {
+    ::-webkit-scrollbar {
+        width: 100px;
+    }
+}
