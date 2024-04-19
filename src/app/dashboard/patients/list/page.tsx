@@ -2,16 +2,16 @@
 
 import styles from '@/app/ui/list.module.css';
 
-import { Box, Chip } from "@mui/material";
-import { useMemo } from 'react';
-import {
-    MaterialReactTable,
-    useMaterialReactTable,
-    type MRT_ColumnDef, //if using TypeScript (optional, but recommended)
-} from 'material-react-table';
+import { Box } from "@mui/material";
+
+// import {
+//     MaterialReactTable,
+//     useMaterialReactTable,
+//     type MRT_ColumnDef, //if using TypeScript (optional, but recommended)
+// } from 'material-react-table';
 
 //Import Material React Table Translations
-import { MRT_Localization_PT_BR } from 'material-react-table/locales/pt-BR';
+// import { MRT_Localization_PT_BR } from 'material-react-table/locales/pt-BR';
 
 
 const ListPatients = () => {
@@ -149,66 +149,69 @@ const ListPatients = () => {
 
     function App() {
         //column definitions - strongly typed if you are using TypeScript (optional, but recommended)
-        const columns = useMemo<MRT_ColumnDef<Patient>[]>(
-            () => [
-                {
-                    accessorKey: 'name', //simple recommended way to define a column
-                    header: 'Nome',
+        // const columns = useMemo<MRT_ColumnDef<Patient>[]>(
+        //     () => [
+        //         {
+        //             accessorKey: 'name', //simple recommended way to define a column
+        //             header: 'Nome',
 
-                    // muiTableHeadCellProps: { style: { color: 'green' } }, //custom props
-                    enableHiding: false, //disable a feature for this column
-                },
-                {
-                    accessorKey: 'age', //simple recommended way to define a column
-                    header: 'Idade',
+        //             // muiTableHeadCellProps: { style: { color: 'green' } }, //custom props
+        //             enableHiding: false, //disable a feature for this column
+        //         },
+        //         {
+        //             accessorKey: 'age', //simple recommended way to define a column
+        //             header: 'Idade',
 
-                    // muiTableHeadCellProps: { style: { color: 'blue' } }, //custom props
-                    enableHiding: false, //disable a feature for this column
-                },
-                {
-                    accessorKey: 'gender', //simple recommended way to define a column
-                    header: 'Genero',
-                    // muiTableHeadCellProps: { style: { color: 'blue' } }, //custom props
-                    enableHiding: false, //disable a feature for this column
-                },
-                {
-                    accessorKey: 'group', //simple recommended way to define a column
-                    header: 'Grupo',
-                    Cell: ({ cell }) => (
-                        <Chip label={cell.getValue<string>()} color="primary" variant="outlined" />
-                    ),
-                    // muiTableHeadCellProps: { style: { color: 'green' } }, //custom props
-                    enableHiding: false, //disable a feature for this column
-                },
-            ],
-            [],
-        );
+        //             // muiTableHeadCellProps: { style: { color: 'blue' } }, //custom props
+        //             enableHiding: false, //disable a feature for this column
+        //         },
+        //         {
+        //             accessorKey: 'gender', //simple recommended way to define a column
+        //             header: 'Genero',
+        //             // muiTableHeadCellProps: { style: { color: 'blue' } }, //custom props
+        //             enableHiding: false, //disable a feature for this column
+        //         },
+        //         {
+        //             accessorKey: 'group', //simple recommended way to define a column
+        //             header: 'Grupo',
+        //             Cell: ({ cell }) => (
+        //                 <Chip label={cell.getValue<string>()} color="primary" variant="outlined" />
+        //             ),
+        //             // muiTableHeadCellProps: { style: { color: 'green' } }, //custom props
+        //             enableHiding: false, //disable a feature for this column
+        //         },
+        //     ],
+        //     [],
+        // );
 
         //pass table options to useMaterialReactTable
-        const table = useMaterialReactTable({
-            columns,
-            data, //must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
-            enableRowSelection: false, //enable some features
-            enableColumnOrdering: true, //enable a feature for all columns
-            enableGlobalFilter: false, //turn off a feature
-            enableColumnActions: false,
-            enableTopToolbar: false,
-            enableBottomToolbar: true,
-            enableColumnDragging: false,
-            enableGlobalFilterModes: true,
-            enableSelectAll: false,
-            localization: MRT_Localization_PT_BR,
-            muiTableContainerProps: {
-                sx: { maxHeight: '80vh', minWidth: '100%' },
+        // const table = useMaterialReactTable({
+        //     columns,
+        //     data, //must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
+        //     enableRowSelection: false, //enable some features
+        //     enableColumnOrdering: true, //enable a feature for all columns
+        //     enableGlobalFilter: false, //turn off a feature
+        //     enableColumnActions: false,
+        //     enableTopToolbar: false,
+        //     enableBottomToolbar: true,
+        //     enableColumnDragging: false,
+        //     enableGlobalFilterModes: true,
+        //     enableSelectAll: false,
+        //     localization: MRT_Localization_PT_BR,
+        //     muiTableContainerProps: {
+        //         sx: { maxHeight: '80vh', minWidth: '100%' },
 
 
 
-            }
-        });
+        //     }
+        // });
 
         //note: you can also pass table options as props directly to <MaterialReactTable /> instead of using useMaterialReactTable
         //but the useMaterialReactTable hook will be the most recommended way to define table options
-        return <MaterialReactTable table={table} />;
+        // return <MaterialReactTable table={table} />;
+        return (
+            <></>
+        );
     }
 
 
