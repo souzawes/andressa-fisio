@@ -1,9 +1,8 @@
 "use client"
 
+import React, { ChangeEvent, useState } from 'react';
 import { Box, Button, MenuItem, Grid, TextField, InputLabel, FormControl } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import * as React from 'react';
-import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -12,8 +11,11 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const FormPatientRegister = () => {
 
+    const [cpf, setCPF] = useState('');
     const [gender, setGender] = React.useState('');
     const [civilState, setCivilState] = React.useState('');
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [houseNumber, setHouseNumber] = useState('');
 
     const handleChangeGender = (event: SelectChangeEvent) => {
         setGender(event.target.value as string);
@@ -23,21 +25,30 @@ const FormPatientRegister = () => {
         setCivilState(event.target.value as string);
     };
 
-    function Label({
-        componentName,
-        valueType,
-    }: {
-        componentName: string;
-        valueType: string;
-    }) {
-        const content = (
-            <span>
-                <strong>{componentName}</strong> for {valueType} editing
-            </span>
-        );
+    const handleChangeCpf = (e: ChangeEvent<HTMLInputElement>) => {
+        const inputCPF = e.target.value;
+        const formattedCPF = formatCPF(inputCPF);
+        setCPF(formattedCPF);
+    };
 
-        return content;
+    const formatCPF = (value: string) => {
+        const cleaned = value.replace(/\D/g, '');
+        const truncated: string = cleaned.slice(0, 11);
+        const formatted: string = truncated.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        return formatted;
+    };
+
+    const handleHouseNumber = (e: ChangeEvent<HTMLInputElement>) => {
+        const inputHouseNumber = e.target.value;
+        const formattedHouseNumber = formatHouseNumber(inputHouseNumber);
+        setHouseNumber(formattedHouseNumber)
     }
+
+    const formatHouseNumber = (value: string) => {
+        const cleaned = value.replace(/\D/g, '');
+        return cleaned
+    }
+
     return (
         <Box display='flex' flexDirection='column' alignContent='center' alignItems='center' width='100%'>
             <Grid container width="80vw" height="80%" alignItems="center" alignContent='center' justifyContent='center' display='flex' spacing={3}>
@@ -45,7 +56,7 @@ const FormPatientRegister = () => {
                     <TextField fullWidth id="full-name" label="Nome completo" variant="outlined" />
                 </Grid>
                 <Grid item md={4} lg={4} xl={4} >
-                    <TextField fullWidth id="cpf" label="CPF" variant="outlined" />
+                    <TextField fullWidth id="cpf" label="CPF" variant="outlined" value={cpf} onChange={handleChangeCpf} />
                 </Grid>
                 <Grid item md={6} lg={6} xl={6} >
                     <TextField fullWidth id="address" label="Endereço" variant="outlined" />
@@ -54,20 +65,18 @@ const FormPatientRegister = () => {
                     <TextField fullWidth id="neighborhood" label="Bairro" variant="outlined" />
                 </Grid>
                 <Grid item md={3} lg={3} xl={3} >
-                    <TextField fullWidth id="house-number" label="Numero" variant="outlined" />
+                    <TextField fullWidth id="house-number" label="Numero" variant="outlined" value={houseNumber} onChange={handleHouseNumber} />
                 </Grid>
                 <Grid item md={3} lg={3} xl={3}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DemoContainer
-                            components={[
-                                'DatePicker'
-                            ]}
-                        >
-                            <DemoItem>
-                                <DatePicker sx={{ width: '100%' }} />
-                            </DemoItem>
 
-                        </DemoContainer>
+                        <DatePicker
+                            label="Data de nascimento"
+                            value={selectedDate}
+                            onChange={(newValue) => setSelectedDate(newValue)}
+                            renderInput={(params) => <TextField {...params} />}
+                        />
+
                     </LocalizationProvider>
                 </Grid>
                 <Grid item md={4} lg={4} xl={4}>
