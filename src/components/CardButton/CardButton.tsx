@@ -26,6 +26,7 @@ const CardButton: React.FC<CardButtonProps> = ({ icon, title, link, index }) => 
       <Link href={link}
         style={{ display: "flex", width: '100%' }}>
         <Card
+          key={index}
           sx={{
             display: "flex",
             justifyContent: "center",

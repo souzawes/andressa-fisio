@@ -40,7 +40,7 @@ const Patients = () => {
       rowSpacing={0}
     >
       {cardButtonsPatients.map((cardButon, index) => {
-        return <CardButton icon={cardButon.icon} title={cardButon.title} link={cardButon.link} index={index} />;
+        return <CardButton key={index} icon={cardButon.icon} title={cardButon.title} link={cardButon.link} index={index} />;
       })}
     </Grid>
   );
