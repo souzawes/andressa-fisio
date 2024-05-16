@@ -10,7 +10,28 @@ import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
 import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 
-const DashBoard = () => {
+import { getClient } from '../../lib/client';
+import { gql } from "@apollo/client";
+
+async function loadData() {
+  const { data } = await getClient().query({
+    query: gql`
+      query {
+        characters(page: 1) {
+          results {
+            id
+            name
+            image
+          }
+        }
+      }
+    `
+  })
+  return data.characters.results
+  // console.log(data.characters.results)
+}
+
+const DashBoard = async () => {
 
   const cardButonsHome = [
     {
@@ -45,6 +66,8 @@ const DashBoard = () => {
     },
   ];
 
+  // const characters = await loadData();
+
   return (
     <Grid
       width="80vw"
@@ -57,7 +80,17 @@ const DashBoard = () => {
       {cardButonsHome.map((cardButon, index) => {
         return <CardButton key={index} icon={cardButon.icon} title={cardButon.title} link={cardButon.link} index={index} />;
       })}
+
     </Grid>
+    // <>
+    //   {characters.map((character: any) => (
+    //     <div key={character.id}>
+    //       <h3>{character.name}</h3>
+    //       <img src={character.image} alt="" />
+
+    //     </div>
+    //   ))}
+    // </>
   );
 };
 

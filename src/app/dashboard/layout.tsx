@@ -23,7 +23,16 @@ function DashBoard({
       alignItems="center"
       height="100vh"
     >
-      <AppBar elevation={0} color="transparent" sx={{ display: 'flex', justifyContent: 'center', height: '10vh' }} >
+
+      <AppBar
+        elevation={0}
+        color="transparent"
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          height: '10vh'
+        }}
+      >
         {/* <Box style={{ display: "flex", width: "inherit"}}> */}
         <Box sx={{ display: 'flex', width: 'inherit' }}>
           <Toolbar
@@ -59,20 +68,22 @@ function DashBoard({
           </Toolbar>
         </Box>
       </AppBar>
+
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          width: "96vw",
+          width: "99vw",
           height: "88vh",
           backgroundColor: "#E8E8E8",
-          borderRadius: "20px 20px 0px 0px",
+          borderRadius: "5px 5px 0px 0px",
           zIndex: 1,
         }}
       >
         {children}
       </Box>
+
     </Stack>
   );
 }
