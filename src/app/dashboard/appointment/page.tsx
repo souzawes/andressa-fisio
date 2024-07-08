@@ -17,26 +17,12 @@ import {
 import Typography from '@mui/material/Typography';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { ChangeEvent, FormEvent, Suspense, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/pt-br';
-// import { getPatients } from '../../../services/databaseService';
-
-// import { gql, useSuspenseQuery, TypedDocumentNode } from '@apollo/client';
-
-// const query = gql`
-//     query {
-//         characters(page: 1) {
-//           results {
-//             id
-//             name
-//             image
-//           }
-//         }
-//       }
-// `;
+import HeaderPages from '@/components/HearderPages/HeaderPages';
 
 interface Patient {
     id: string;
@@ -149,11 +135,14 @@ const Appointment: React.FC = () => {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        const combinedStartTime = selectedDate?.hour(selectedStartTime?.hour()!).minute(selectedStartTime?.minute()!);
+        const combinedEndTime = selectedDate?.hour(selectedEndTime?.hour()!).minute(selectedEndTime?.minute()!);
+
         const appointmentData = {
             patient_id: selectedPatient,
             date: selectedDate,
-            start_time: selectedStartTime,
-            end_time: selectedEndTime,
+            start_time: combinedStartTime,
+            end_time: combinedEndTime,
             type: "Padrão"
         };
 
@@ -203,10 +192,8 @@ const Appointment: React.FC = () => {
     };
 
     return (
-        <Container>
-            <Typography variant='h4' color='primary' align='center' gutterBottom mb={10}>
-                Marcar Consulta
-            </Typography>
+        <Container sx={{ display: 'flex', flexDirection: 'column', height: '80%' }}>
+            <HeaderPages title={'Marcar procedimento'} backButton={true} />
             <form onSubmit={handleSubmit}>
                 <Grid container spacing={3}>
                     <Grid item md={12} lg={12} xl={12}>

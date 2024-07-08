@@ -1,17 +1,19 @@
 import React from 'react';
 import "../globals.css";
 
-import { AppBar, Box, IconButton, Stack, Toolbar } from "@mui/material";
+import { auth } from '../../../auth';
+import { AppBar, Box, Button, Stack, Toolbar } from "@mui/material";
+import logout from '../../actions/Logout/logout';
+
 
 import Image from 'next/image';
 import logoAppBar from "../../../public/logoappbar.svg";
-
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import GradientIcon from '@/components/GradientIcon/GradientIcon';
 
-function DashBoard({
+import { redirect } from 'next/navigation';
+
+async function DashBoard({
   children
 }: {
   children: React.ReactNode;
@@ -43,10 +45,9 @@ function DashBoard({
         sx={{
           display: 'flex',
           justifyContent: 'center',
-          height: '10vh'
+          height: '12vh'
         }}
       >
-        {/* <Box style={{ display: "flex", width: "inherit"}}> */}
         <Box sx={{ display: 'flex', width: 'inherit' }}>
           <Toolbar
             disableGutters
@@ -59,24 +60,38 @@ function DashBoard({
               alignItems: "center",
             }}
           >
-            <Image src={logoAppBar} alt="" width={215} height={70} style={{ marginLeft: '4vw' }} />
+            <Image src={logoAppBar} alt="" width={215} height={70} style={{ marginLeft: margin }} />
+
             <Stack
               sx={{
-                width: "230px",
-                height: "35px",
+                width: "auto",
+                height: "7vh",
                 display: "flex",
                 flexDirection: "row",
                 alignContent: "center",
                 alignItems: "center",
                 justifyContent: "space-around",
-                backgroundColor: "#E8E8E8",
-                borderRadius: "20px",
-                marginRight: "4vw"
+                backgroundColor: "rgb(241, 241, 241, 0.75)",
+                borderRadius: "5px",
+                paddingLeft: "16px",
+                marginRight: margin
               }}
             >
-              <GradientIcon icon={<NotificationsNoneIcon sx={{ color: "#0B3948", fill: "url(#gradientColors)" }} />} />
-              <GradientIcon icon={<SettingsOutlinedIcon sx={{ color: "#0B3948", fill: "url(#gradientColors)" }} />} />
-              <GradientIcon icon={<LogoutOutlinedIcon sx={{ color: "#0B3948", fill: "url(#gradientColors)" }} />} />
+              <p style={{ color: '#0095A1', marginRight: '16px' }} >Olá, {user?.name ?? ''}! </p>
+
+              <form className='logout' action={logout}>
+                <Button
+                  type='submit'
+                  sx={{
+                    width: 'inherit',
+                    marginRight: '10px',
+                    backgroundColor: 'rgb(241, 241, 241, 0.5)'
+                  }}
+                >
+                  <GradientIcon icon={<LogoutOutlinedIcon sx={{ color: "#0B3948", fill: "url(#gradientColors)" }} />} />
+                </Button>
+              </form>
+
             </Stack>
           </Toolbar>
         </Box>
@@ -87,9 +102,9 @@ function DashBoard({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          width: "99vw",
+          width: "96vw",
           height: "88vh",
-          backgroundColor: "#E8E8E8",
+          backgroundColor: "rgb(241, 241, 241, 0.9)",
           borderRadius: "5px 5px 0px 0px",
           zIndex: 1,
         }}

@@ -72,6 +72,7 @@ const DashBoard = async () => {
     <Grid
       width="80vw"
       height="80%"
+      maxWidth="1400px"
       container
       columnSpacing={4}
 
@@ -82,15 +83,6 @@ const DashBoard = async () => {
       })}
 
     </Grid>
-    // <>
-    //   {characters.map((character: any) => (
-    //     <div key={character.id}>
-    //       <h3>{character.name}</h3>
-    //       <img src={character.image} alt="" />
-
-    //     </div>
-    //   ))}
-    // </>
   );
 };
 

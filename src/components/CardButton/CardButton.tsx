@@ -30,10 +30,10 @@ const CardButton: React.FC<CardButtonProps> = ({ icon, title, link, index }) => 
           sx={{
             display: "flex",
             justifyContent: "center",
-            backgroundColor: "#E0E0E0",
+            backgroundColor: "rgb(241, 241, 241, 0.3)",
             width: "100%",
             height: "125px",
-            borderRadius: "10px",
+            borderRadius: "5px",
             boxShadow: "0px 0px 4px 0.5px #7691A0",
           }}
         >
