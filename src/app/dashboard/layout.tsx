@@ -16,6 +16,19 @@ function DashBoard({
 }: {
   children: React.ReactNode;
 }) {
+
+  const margin = '2vw'
+
+  let user = undefined
+
+  const session = await auth()
+
+  if (session) {
+    user = session.user
+  } else {
+    return redirect("/")
+  }
+
   return (
     <Stack
       direction="column"

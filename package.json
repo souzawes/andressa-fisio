@@ -27,6 +27,7 @@
     "@mui/material-nextjs": "^5.15.11",
     "@vercel/postgres": "^0.8.0",
     "bcrypt": "^5.1.1",
+    "bcrypt-ts": "^5.0.2",
     "dayjs": "^1.11.8",
     "dotenv": "^16.4.5",
     "graphql": "^16.8.1",
