@@ -46,3 +46,28 @@ export async function POST(req:Request) {
         )        
     }
 }
+
+export async function PATCH(req: Request) {
+    const { id, date, start_time, end_time } = await req.json()
+    try {
+        const updateAppointment = await prisma.appointments.update({
+            where: {
+                id: id,
+            },
+            data: {
+                date, start_time, end_time
+            }
+        })
+        return Response.json({message: "OK", updateAppointment})
+    } catch(err) {
+        return NextResponse.json(
+            {
+                message: "Error",
+                err
+            },
+            {
+                status: 500
+            }
+        )
+    }
+}
