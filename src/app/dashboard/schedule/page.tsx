@@ -18,7 +18,7 @@ import theme from '@/theme/Theme';
 
 
 import appointments from '@/utils/today-appoitment';
-import React, { useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
 import HeaderPages from '@/components/HearderPages/HeaderPages';
 import { Stack } from '@mui/material';
@@ -65,10 +65,10 @@ const Schedule = () => {
             const appointmentSchedules = await Promise.all(fetchedAppointments.map(async (appointment: Appointment) => {
                 const { id, patient_id, date, start_time, end_time } = appointment;
                 const startTime = new Date(start_time)
-                startTime.setTime(startTime.getTime() + startTime.getTimezoneOffset() * 60 * 1000)
+                // startTime.setTime(startTime.getTime() + startTime.getTimezoneOffset() * 60 * 1000)
 
                 const endTime = new Date(end_time)
-                endTime.setTime(endTime.getTime() + endTime.getTimezoneOffset() * 60 * 1000)
+                // endTime.setTime(endTime.getTime() + endTime.getTimezoneOffset() * 60 * 1000)
 
                 const dateBase = new Date(date)
                 dateBase.setTime(dateBase.getTime() + dateBase.getTimezoneOffset() * 60 * 1000)
@@ -103,60 +103,6 @@ const Schedule = () => {
         }
         fetchAppointments();
     }, []);
-
-
-
-    //     const abc = appoitment.map(({ id, patient_id, date, start_time, end_time }) => {
-    //         const startTime = new Date(start_time)
-    //         startTime.setTime(startTime.getTime() + startTime.getTimezoneOffset() * 60 * 1000)
-
-    //         const endTime = new Date(end_time)
-    //         endTime.setTime(endTime.getTime() + endTime.getTimezoneOffset() * 60 * 1000)
-
-    //         const dateBase = new Date(date)
-    //         dateBase.setTime(dateBase.getTime() + dateBase.getTimezoneOffset() * 60 * 1000)
-
-    //         startTime.setFullYear(dateBase.getFullYear())
-    //         startTime.setMonth(dateBase.getMonth())
-    //         startTime.setDate(dateBase.getDay())
-
-
-    //         const startDate = moment(dateBase)
-    //             .hour(startTime.getHours())
-    //             .minutes(startTime.getMinutes())
-    //             .toDate();
-
-    //         const endDate = moment(dateBase)
-    //             .hour(endTime.getHours())
-    //             .minutes(endTime.getMinutes())
-    //             .toDate();
-
-
-    //         const fetchNamePatient = async () => {
-    //             const res = await fetch(`/api/patient/${patient_id}`)
-    //             const dataPatient = await res.json();
-    //             namesPatients.push(dataPatient.patient.name)
-    //             setNamePatient(namesPatients)
-    //         }
-
-    //         fetchNamePatient()
-
-    //         const title = `Consulta de ${namesPatients[namesPatients.length - 1]}`
-
-    //         const result = {
-    //             startDate,
-    //             endDate,
-    //             title,
-    //             id
-    //         }
-
-    //         return result
-    //     })
-
-    //     setAppointmentSchedule(abc)
-
-
-    // }, [appoitment, namePatient])
 
     const handleCurrentDateChange = (newDate: any) => {
         setCurrentDate(newDate);
@@ -205,10 +151,10 @@ const Schedule = () => {
         const date = new Date(startDate);
 
         if (date.getDate() === new Date().getDate()) {
-            return <StyledWeekViewTimeTableCell {...props} className={classes.todayCell} />;
+            return <StyledWeekViewTimeTableCell {...props} className={classes.todayCell} onDoubleClick={undefined} />;
         } if (date.getDay() === 0 || date.getDay() === 6) {
             return <StyledWeekViewTimeTableCell {...props} className={classes.weekendCell} />;
-        } return <StyledWeekViewTimeTableCell {...props} />;
+        } return <StyledWeekViewTimeTableCell {...props} onDoubleClick={undefined} />;
     };
 
     const DayScaleCell = (props: any) => {
