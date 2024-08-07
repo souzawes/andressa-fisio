@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import prisma from "../../../../lib/db"
 
 export async function GET(req: NextRequest) {
     try {
         const appointments = await prisma.appointments.findMany();
-        return Response.json({message: "OK", appointments})
+        return Response.json({ message: "OK", appointments })
     } catch (err) {
         return NextResponse.json(
             {
@@ -17,11 +17,11 @@ export async function GET(req: NextRequest) {
                 status: 500
             }
         )
-    }    
+    }
 }
 
-export async function POST(req:Request) {
-    const {patient_id, type, date, start_time, end_time} = await req.json()
+export async function POST(req: Request) {
+    const { patient_id, type, date, start_time, end_time } = await req.json()
     try {
         const user = await prisma.appointments.create({
             data: {
@@ -32,8 +32,8 @@ export async function POST(req:Request) {
                 start_time,
                 end_time
             }
-        })        
-    return Response.json({message: "OK", user})
+        })
+        return Response.json({ message: "OK", user })
     } catch (err) {
         return NextResponse.json(
             {
@@ -43,23 +43,23 @@ export async function POST(req:Request) {
             {
                 status: 500
             }
-        )        
+        )
     }
 }
 
 export async function PATCH(req: Request) {
-    const { id, date, start_time, end_time } = await req.json()
+    const { id, /*date,*/ start_time, end_time } = await req.json()
     try {
         const updateAppointment = await prisma.appointments.update({
             where: {
                 id: id,
             },
             data: {
-                date, start_time, end_time
+                /*date,*/ start_time, end_time
             }
         })
-        return Response.json({message: "OK", updateAppointment})
-    } catch(err) {
+        return Response.json({ message: "OK", updateAppointment })
+    } catch (err) {
         return NextResponse.json(
             {
                 message: "Error",
