@@ -1,6 +1,6 @@
 "use client"
 
-import Paper from '@mui/material/Paper';
+import { Box, Paper, TextField } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
 import {
@@ -14,6 +14,11 @@ import {
     Toolbar,
     ConfirmationDialog,
 } from '@devexpress/dx-react-scheduler-material-ui';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker, TimePicker } from '@mui/x-date-pickers';
+
+
 import theme from '@/theme/Theme';
 
 
@@ -21,7 +26,7 @@ import appointments from '@/utils/today-appoitment';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
 import HeaderPages from '@/components/HearderPages/HeaderPages';
-import { Stack } from '@mui/material';
+import { Stack, TextFieldProps } from '@mui/material';
 interface Appointment {
     date: string,
     end_time: string,
@@ -52,10 +57,15 @@ const Schedule = () => {
 
     const [data, setData] = useState(appointments);
     const [currentDate, setCurrentDate] = useState(Date.now);
+    const [appointmentHasUpdate, setAppointmentHasUpdate] = useState<boolean>(false)
+    const [appointmentHasEdited, setAppointmentHasEdited] = useState<boolean>(false)
 
     const [namePatient, setNamePatient] = useState<string[] | null>(null)
 
+    const [chandedId, setChangedId] = useState<string[] | null>(null)
+
     useEffect(() => {
+        setAppointmentHasEdited(false)
         const fetchAppointments = async () => {
             const res = await fetch(`/api/appointment`);
             const data = await res.json();
@@ -102,7 +112,7 @@ const Schedule = () => {
             setAppointmentSchedule(appointmentSchedules);
         }
         fetchAppointments();
-    }, []);
+    }, [appointmentHasEdited]);
 
     const handleCurrentDateChange = (newDate: any) => {
         setCurrentDate(newDate);
@@ -171,28 +181,66 @@ const Schedule = () => {
         return <StyledWeekViewDayScaleCell {...props} />;
     };
 
+    interface ChangedSet {
+        added?: { [key: string]: any }
+        changed?: { [key: string]: AppointmentSchedule }
+        deleted?: number | string
+    }
 
-    function commitChanges({ added, changed, deleted }: any) {
+    const updateAppoitment = async (appointment: AppointmentSchedule | undefined) => {
+        if (!appointment) return; // Verifica se o appointment é válido
+
+        const { id, startDate, endDate } = appointment;
+
+
+        // const date = startDate.toISOString().split('T')[0]; // Extrai a data (AAAA-MM-DD)
+        const start_time = startDate.toISOString();
+        const end_time = endDate.toISOString();
+        try {
+            const res = await fetch(`/api/appointment`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id, start_time, end_time })
+            });
+
+            if (res.ok) {
+                const result = await res.json();
+                console.log(result.message);
+                return result;
+            } else {
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Erro ao atualizar o compromisso');
+            }
+        } catch (error) {
+            console.error(`Error ${error}`);
+            throw error
+        }
+    }
+
+    function commitChanges({ changed }: ChangedSet) {
 
         if (changed) {
+            setChangedId(Object.keys(changed))
             let dataChanged =
-                data.map(appointments => (
+                appoitmenttSchedule?.map(appointments => (
                     changed[appointments.id] ? { ...appointments, ...changed[appointments.id] } : appointments
                 ))
-            setData(dataChanged)
+            setAppointmentSchedule(dataChanged)
+            setAppointmentHasUpdate(true)
         }
-
-        if (added) {
-
-        }
-
-        if (deleted) {
-
-        }
-
-
-        // return dataChanged
     };
+
+    useEffect(() => {
+        if (appointmentHasUpdate) {
+            appoitmenttSchedule?.map(appointment => {
+                if (appointment.id === chandedId!![0]) {
+                    const response = updateAppoitment(appointment)
+                }
+            })
+        }
+    }, [appointmentHasUpdate, appoitmenttSchedule, chandedId])
 
     // const Appointment: React.FC<Appointments.AppointmentProps> = ({
     //     children, style, ...restProps
@@ -209,14 +257,115 @@ const Schedule = () => {
     //     </Appointments.Appointment>
     // );
 
+    interface BasicLayoutProps {
+        readOnly?: boolean
+        appointmentData: AppointmentSchedule
+        appointmentResources: Array<any>
+        onFieldChange: (nextFieldValue: { [fieldName: string]: any }) => void
+    }
+
+    const TextEditor = (props: AppointmentForm.TextEditorProps) => {
+        // eslint-disable-next-line react/destructuring-assignment
+        if (props.type === 'multilineTextEditor') {
+            return null;
+        }
+
+        // if (props.type === 'titleTextEditor') {
+        //     props.readOnly = true
+        // }
+
+        return <AppointmentForm.TextEditor{...props} />;
+    };
+
+    const BooleanEditor = (props: AppointmentForm.BooleanEditorProps) => {
+        if (props.label === 'All Day' || props.label === 'Repeat') {
+            return null;
+        }
+        return <AppointmentForm.BooleanEditor {...props} />;
+    };
+
+    const LabelComponent = (props: AppointmentForm.LabelProps) => {
+        if (props.text === 'More Information') {
+            return null;
+        }
+        return <AppointmentForm.Label readOnly={true} {...props} />
+    };
+
+    const DateEditorComponent = (props: AppointmentForm.DateEditorProps) => {
+        const handleDateChange = (value: Date | null, keyboardInputValue?: string) => {
+            if (value !== null) {
+                // Lógica para lidar com um valor de data válido
+                console.log("Data selecionada:", value);
+            } else {
+                // Lógica para lidar com um valor nulo
+                console.log("Data removida ou inválida");
+            }
+        };
+
+        const handleTimeChange = (nextValue: Date) => {
+            const hours = nextValue.getHours;
+            const minutes = nextValue.getMinutes;
+            console.log(`Horas selecionadas: ${hours}:${minutes}`);
+        };
+
+        const handleTimeChangeWrapper = (value: Date | null) => {
+            if (value && props.onValueChange) {
+                props.onValueChange(value);
+            }
+        };
+
+        return (
+            // <AppointmentForm.DateEditor readOnly={false} {...props} />
+            <Box
+                sx={{
+                    display: 'flex'
+                }}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <TimePicker
+                        value={props.value}
+                        onChange={handleTimeChangeWrapper}
+                        renderInput={(params) => <TextField {...params} />}
+                    />
+                </LocalizationProvider>
+            </Box>
+        );
+    };
+
+    const BasicLayout = ({ onFieldChange, appointmentData, booleanEditorComponent, labelComponent, dateEditorComponent, ...restProps }: AppointmentForm.BasicLayoutProps) => {
+        return (
+            <AppointmentForm.BasicLayout
+                appointmentData={appointmentData}
+                onFieldChange={onFieldChange}
+                booleanEditorComponent={BooleanEditor}
+                labelComponent={LabelComponent}
+                dateEditorComponent={DateEditorComponent}
+                {...restProps}
+            />
+        );
+    }
+
+    // const handleCommitButtonClick = ({ props...}) => {
+    //     setAppointmentHasEdited(true)
+    // }
+
+    // const CommandLayout = ({ onCommitButtonClick, ...restProps }: AppointmentForm.CommandLayoutProps) => {
+    //     return (
+    //         <AppointmentForm.CommandLayout
+    //             onCommitButtonClick={handleCommitButtonClick}
+    //             {...restProps}
+    //         />
+    //     );
+    // };
+
 
     return (
         <Stack sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
             <HeaderPages title='Calendário' backButton={true}></HeaderPages>
-            <Paper sx={{ mr: 1, ml: 1, borderRadius: '22px', height: '80vh' }}>
+            <Paper sx={{ height: '80vh' }}>
                 <Scheduler
                     data={appoitmenttSchedule}
                     locale={"pt-BR"}
+
                 >
                     <ViewState
                         currentDate={currentDate}
@@ -244,8 +393,10 @@ const Schedule = () => {
                         showOpenButton
                     />
                     <AppointmentForm
-                    // messages={}
-
+                        // messages={}
+                        basicLayoutComponent={BasicLayout}
+                        textEditorComponent={TextEditor}
+                    // commandLayoutComponent={CommandLayout}
                     />
                 </Scheduler>
             </Paper>
