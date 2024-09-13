@@ -48,6 +48,24 @@ export async function POST(req: Request) {
 }
 */
 
+
+export async function GET(req: Request) {
+    try {
+        const classes = await prisma.classes.findMany();
+        return Response.json({ message: "OK", classes })
+    } catch (error) {
+        return NextResponse.json(
+            {
+                message: "Error",
+                error
+            },
+            {
+                status: 500
+            }
+        )
+    }
+};
+
 export async function POST(req: Request) {
     const {
         name,

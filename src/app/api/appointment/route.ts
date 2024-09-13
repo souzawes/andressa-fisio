@@ -71,3 +71,26 @@ export async function PATCH(req: Request) {
         )
     }
 }
+
+export async function DELETE(req: Request) {
+    const { id } = await req.json()
+
+    try {
+        const deleteAppointment = await prisma.appointments.delete({
+            where: {
+                id: id,
+            },
+        })
+        return Response.json({ message: 'OK', deleteAppointment })
+    } catch (err) {
+        return NextResponse.json(
+            {
+                message: "Error",
+                err
+            },
+            {
+                status: 500
+            }
+        )
+    }
+}
