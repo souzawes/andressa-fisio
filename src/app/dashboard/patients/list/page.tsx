@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 const ListPatients = () => {
 
     const [patients, setPatients] = useState([]);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(8);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalCount, setTotalCount] = useState(0);
 
@@ -22,7 +22,7 @@ const ListPatients = () => {
 
     useEffect(() => {
         const fetchPatients = async () => {
-            const res = await fetch(`/api/patient?page=${currentPage}&pageSize=${pageSize}`);
+            const res = await fetch(`/api/patient`);
             const data = await res.json();
             setPatients(data.patients);
             setTotalCount(data.totalCount);
@@ -39,14 +39,8 @@ const ListPatients = () => {
                     columns={columns}
                 >
                     <PagingState
-                        // currentPage={currentPage}
-                        // defaultCurrentPage={currentPage}
-                        // onCurrentPageChange={setCurrentPage}
-                        // pageSize={pageSize}
-                        // onPageSizeChange={setPageSize}
-
                         defaultCurrentPage={0}
-                        pageSize={8}
+                        pageSize={pageSize}
                     />
                     <IntegratedPaging />
                     <Table />
