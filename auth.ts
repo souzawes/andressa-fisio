@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import db from './lib/db';
+import db from '@/lib/db';
 import { compareSync } from 'bcrypt-ts';
 
 export const {

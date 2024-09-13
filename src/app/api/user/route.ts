@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { v4 as uuidv4 } from "uuid";
 
-
-import prisma from "../../../../lib/db"
+import prisma from "@/lib/db"
 
 var bcrypt = require('bcrypt')
 
