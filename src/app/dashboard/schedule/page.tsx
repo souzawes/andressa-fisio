@@ -2,7 +2,7 @@
 
 import { Box, Paper, TextField } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
-import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
+import { ViewState, EditingState, IntegratedEditing, AppointmentsProps } from '@devexpress/dx-react-scheduler';
 import {
     Scheduler,
     WeekView,
@@ -13,6 +13,8 @@ import {
     TodayButton,
     Toolbar,
     ConfirmationDialog,
+    EditRecurrenceMenu,
+    Resources
 } from '@devexpress/dx-react-scheduler-material-ui';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -27,6 +29,7 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
 import HeaderPages from '@/components/HearderPages/HeaderPages';
 import { Stack, TextFieldProps } from '@mui/material';
+import { text } from 'micro';
 interface Appointment {
     date: string,
     end_time: string,
@@ -36,50 +39,75 @@ interface Appointment {
     type: string
 };
 
+interface RecurringSession {
+    id: string,
+    class_id: string,
+    start_date: string,
+    end_date: string,
+    start_time: string,
+    end_time: string,
+    recurrence_pattern: string,
+    recurrence_interval: number,
+    ocuurence_days_of_week: string,
+    rrule: string
+}
+
 interface AppointmentSchedule {
     startDate: Date,
     endDate: Date,
     title?: string,
     allDay?: boolean,
     id: string,
-    rrule?: string,
+    rRule?: string,
     exDate?: string
+    type?: string
 };
 
 const PREFIX = "Demo";
 // const namesPatients: string[] = []
 const namesPatients: { [key: string]: string } = {};
+const namesClasses: { [key: string]: string } = {};
 
 const Schedule = () => {
 
-    const [appoitments, setAppointments] = useState([])
-    const [appoitmenttSchedule, setAppointmentSchedule] = useState<AppointmentSchedule[] | undefined>(undefined)
+    const [appoitments, setAppointments] = useState<AppointmentSchedule[]>([])
+    const [recurringSessions, setRecurringSessions] = useState<AppointmentSchedule[]>([])
+    const [appoitmenttSchedule, setAppointmentSchedule] = useState<AppointmentSchedule[]>([])
 
     const [data, setData] = useState(appointments);
     const [currentDate, setCurrentDate] = useState(Date.now);
     const [appointmentHasUpdate, setAppointmentHasUpdate] = useState<boolean>(false)
     const [appointmentHasEdited, setAppointmentHasEdited] = useState<boolean>(false)
-
-    const [namePatient, setNamePatient] = useState<string[] | null>(null)
+    const [appointmentHasDeleted, setAppointmentHasDeleted] = useState<boolean>(false)
 
     const [chandedId, setChangedId] = useState<string[] | null>(null)
+    const [deletedId, setDeletedId] = useState<string | null>(null)
+
+
+    var _appointmentsSchedules: any[] = []
+    var _recurringSessionsSchedules: any[] = []
+
+    const removeDuplicates = (data: AppointmentSchedule[]) => {
+        const uniqueData = data.filter((item, index, self) =>
+            index === self.findIndex((t) => (
+                t.id === item.id
+            ))
+        );
+        return uniqueData;
+    };
 
     useEffect(() => {
         setAppointmentHasEdited(false)
+
         const fetchAppointments = async () => {
             const res = await fetch(`/api/appointment`);
             const data = await res.json();
-            // setAppointment(data.appointments);
             const fetchedAppointments = data.appointments;
 
             const appointmentSchedules = await Promise.all(fetchedAppointments.map(async (appointment: Appointment) => {
                 const { id, patient_id, date, start_time, end_time } = appointment;
                 const startTime = new Date(start_time)
-                // startTime.setTime(startTime.getTime() + startTime.getTimezoneOffset() * 60 * 1000)
-
                 const endTime = new Date(end_time)
-                // endTime.setTime(endTime.getTime() + endTime.getTimezoneOffset() * 60 * 1000)
-
                 const dateBase = new Date(date)
                 dateBase.setTime(dateBase.getTime() + dateBase.getTimezoneOffset() * 60 * 1000)
 
@@ -99,19 +127,69 @@ const Schedule = () => {
                     namesPatients[patient_id] = dataPatient.patient.name;
                 }
 
-                const title = `Consulta de ${namesPatients[patient_id]}`;
+                const type = 'appointment'
 
-                return {
+                const title = `Consulta de ${namesPatients[patient_id]}`;
+                const dataAppointment: AppointmentSchedule = {
                     startDate,
                     endDate,
                     title,
-                    id
-                };
+                    id,
+                    type
+                }
+                return dataAppointment
             }));
             setAppointments(fetchedAppointments);
-            setAppointmentSchedule(appointmentSchedules);
+            setAppointmentSchedule((prevData) => (removeDuplicates([...prevData, ...appointmentSchedules])));
         }
         fetchAppointments();
+
+        const fetchRecurringSessions = async () => {
+            const res = await fetch(`/api/recurring_sessions`)
+            const data = await res.json();
+            const fetchedRecurringSessions = data.recurring_session;
+
+            const recurringSessionsSchedules = await Promise.all(fetchedRecurringSessions.map(async (recurringSession: RecurringSession) => {
+                const { id, class_id, start_date, start_time, end_time, rrule } = recurringSession;
+
+                const startTime = new Date(start_time)
+                const endTime = new Date(end_time)
+                const date = new Date(start_date)
+                const dateBase = new Date(date)
+                dateBase.setTime(dateBase.getTime() + dateBase.getTimezoneOffset() * 60 * 1000)
+
+                const startDate = moment(dateBase)
+                    .hour(startTime.getHours())
+                    .minutes(startTime.getMinutes())
+                    .toDate();
+
+                const endDate = moment(dateBase)
+                    .hour(endTime.getHours())
+                    .minutes(endTime.getMinutes())
+                    .toDate();
+
+                if (!namesClasses[class_id]) {
+                    const res = await fetch(`/api/classes/${class_id}`);
+                    const dataClass = await res.json();
+                    namesClasses[class_id] = dataClass.classe.name;
+                }
+
+                const type = 'recurring_session'
+                const title = `Sessão - ${namesClasses[class_id]}`
+                const dataRecurringSession: AppointmentSchedule = {
+                    startDate,
+                    endDate,
+                    title,
+                    id,
+                    rRule: rrule,
+                    type
+                }
+                return dataRecurringSession
+            }));
+            setRecurringSessions(fetchedRecurringSessions)
+            setAppointmentSchedule((prevData) => (removeDuplicates([...prevData, ...recurringSessionsSchedules])))
+        }
+        fetchRecurringSessions();
     }, [appointmentHasEdited]);
 
     const handleCurrentDateChange = (newDate: any) => {
@@ -188,12 +266,8 @@ const Schedule = () => {
     }
 
     const updateAppoitment = async (appointment: AppointmentSchedule | undefined) => {
-        if (!appointment) return; // Verifica se o appointment é válido
-
+        if (!appointment) return;
         const { id, startDate, endDate } = appointment;
-
-
-        // const date = startDate.toISOString().split('T')[0]; // Extrai a data (AAAA-MM-DD)
         const start_time = startDate.toISOString();
         const end_time = endDate.toISOString();
         try {
@@ -219,7 +293,33 @@ const Schedule = () => {
         }
     }
 
-    function commitChanges({ changed }: ChangedSet) {
+    const deleteAppointment = async (id: string) => {
+
+        try {
+
+            const res = await fetch(`/api/appointment`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id })
+            });
+
+            if (res.ok) {
+                const result = await res.json();
+                console.log(result.message);
+                return result;
+            } else {
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Erro ao excluir o compromisso');
+            }
+        } catch (error) {
+            console.error(`Error ${error}`);
+            throw error
+        }
+    }
+
+    async function commitChanges({ changed, deleted }: ChangedSet) {
 
         if (changed) {
             setChangedId(Object.keys(changed))
@@ -229,6 +329,15 @@ const Schedule = () => {
                 ))
             setAppointmentSchedule(dataChanged)
             setAppointmentHasUpdate(true)
+        }
+
+        if (deleted) {
+
+            setDeletedId(deleted as string)
+            let dataDeleted = appoitmenttSchedule?.filter(appointment => appointment.id !== deleted)
+            setAppointmentSchedule(dataDeleted)
+            setAppointmentHasDeleted(true)
+
         }
     };
 
@@ -242,20 +351,12 @@ const Schedule = () => {
         }
     }, [appointmentHasUpdate, appoitmenttSchedule, chandedId])
 
-    // const Appointment: React.FC<Appointments.AppointmentProps> = ({
-    //     children, style, ...restProps
-    // }) => (
-    //     <Appointments.Appointment
-    //         {...restProps}
-    //         style={{
-    //             ...style,
-    //             backgroundColor: '#0095A1',
-    //             borderRadius: '8px',
-    //         }}
-    //     >
-    //         {children}
-    //     </Appointments.Appointment>
-    // );
+    useEffect(() => {
+        if (appointmentHasDeleted) {
+            deleteAppointment(deletedId!)
+            setAppointmentHasDeleted(false)
+        }
+    }, [appointmentHasDeleted, appoitmenttSchedule, deletedId])
 
     interface BasicLayoutProps {
         readOnly?: boolean
@@ -265,15 +366,9 @@ const Schedule = () => {
     }
 
     const TextEditor = (props: AppointmentForm.TextEditorProps) => {
-        // eslint-disable-next-line react/destructuring-assignment
         if (props.type === 'multilineTextEditor') {
             return null;
         }
-
-        // if (props.type === 'titleTextEditor') {
-        //     props.readOnly = true
-        // }
-
         return <AppointmentForm.TextEditor{...props} />;
     };
 
@@ -294,10 +389,8 @@ const Schedule = () => {
     const DateEditorComponent = (props: AppointmentForm.DateEditorProps) => {
         const handleDateChange = (value: Date | null, keyboardInputValue?: string) => {
             if (value !== null) {
-                // Lógica para lidar com um valor de data válido
                 console.log("Data selecionada:", value);
             } else {
-                // Lógica para lidar com um valor nulo
                 console.log("Data removida ou inválida");
             }
         };
@@ -315,7 +408,6 @@ const Schedule = () => {
         };
 
         return (
-            // <AppointmentForm.DateEditor readOnly={false} {...props} />
             <Box
                 sx={{
                     display: 'flex'
@@ -333,30 +425,27 @@ const Schedule = () => {
 
     const BasicLayout = ({ onFieldChange, appointmentData, booleanEditorComponent, labelComponent, dateEditorComponent, ...restProps }: AppointmentForm.BasicLayoutProps) => {
         return (
-            <AppointmentForm.BasicLayout
-                appointmentData={appointmentData}
-                onFieldChange={onFieldChange}
-                booleanEditorComponent={BooleanEditor}
-                labelComponent={LabelComponent}
-                dateEditorComponent={DateEditorComponent}
-                {...restProps}
-            />
+            <>
+                <AppointmentForm.BasicLayout
+                    appointmentData={appointmentData}
+                    onFieldChange={onFieldChange}
+                    booleanEditorComponent={BooleanEditor}
+                    labelComponent={LabelComponent}
+                    dateEditorComponent={DateEditorComponent}
+                    {...restProps}
+                />
+            </>
         );
     }
 
-    // const handleCommitButtonClick = ({ props...}) => {
-    //     setAppointmentHasEdited(true)
-    // }
-
-    // const CommandLayout = ({ onCommitButtonClick, ...restProps }: AppointmentForm.CommandLayoutProps) => {
-    //     return (
-    //         <AppointmentForm.CommandLayout
-    //             onCommitButtonClick={handleCommitButtonClick}
-    //             {...restProps}
-    //         />
-    //     );
-    // };
-
+    const resources = [{
+        fieldName: 'type',
+        title: 'Type',
+        instances: [
+            { id: 'appointment', text: 'Consulta', color: '#0095A1' },
+            { id: 'recurring_session', text: 'Sessão Recorrente', color: '#F42272' },
+        ],
+    }];
 
     return (
         <Stack sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
@@ -377,7 +466,7 @@ const Schedule = () => {
                     <IntegratedEditing />
                     <ConfirmationDialog />
                     <WeekView
-                        startDayHour={9}
+                        startDayHour={6}
                         endDayHour={19}
                         timeTableCellComponent={TimeTableCell}
                         dayScaleCellComponent={DayScaleCell}
@@ -385,18 +474,17 @@ const Schedule = () => {
                     <Toolbar />
                     <DateNavigator />
                     <TodayButton />
-                    <Appointments
-                    // appointmentComponent={Appointment}
+                    <Appointments />
+                    <Resources
+                        data={resources}
                     />
                     <AppointmentTooltip
                         showCloseButton
                         showOpenButton
                     />
                     <AppointmentForm
-                        // messages={}
                         basicLayoutComponent={BasicLayout}
                         textEditorComponent={TextEditor}
-                    // commandLayoutComponent={CommandLayout}
                     />
                 </Scheduler>
             </Paper>
