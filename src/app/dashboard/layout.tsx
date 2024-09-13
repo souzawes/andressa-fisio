@@ -104,8 +104,9 @@ async function DashBoard({
           justifyContent: "center",
           width: "96vw",
           height: "88vh",
+          mb: "1vh",
           backgroundColor: "rgb(241, 241, 241, 0.9)",
-          borderRadius: "5px 5px 0px 0px",
+          borderRadius: "5px 5px 5px 5px",
           zIndex: 1,
         }}
       >
