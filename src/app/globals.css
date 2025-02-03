@@ -4,3 +4,11 @@ body {
   margin: 0;
   padding: 0;
 }
+
+.Layout-dateEditors {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 8px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}

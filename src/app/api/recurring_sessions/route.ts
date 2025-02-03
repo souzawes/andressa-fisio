@@ -61,3 +61,40 @@ export async function POST(req: NextRequest) {
         )
     }
 }
+
+export async function PATCH(req: NextRequest) {
+    const {
+        id,
+        start_time,
+        end_time,
+        ex_date,
+        // rrule 
+    } = await req.json()
+
+    try {
+        const updateRecurringSession = await prisma.recurring_sessions.update({
+            where: {
+                id: id,
+            },
+            data: {
+                start_time,
+                end_time,
+                ex_date,
+                // rrule,
+            }
+        })
+        return NextResponse.json({ message: "OK", updateRecurringSession })
+
+    } catch (err: any) {
+        console.error('Error', err)
+        return NextResponse.json(
+            {
+                message: 'Error',
+                error: err.message || 'Erro desconhecido',
+            },
+            {
+                status: 500,
+            }
+        )
+    }
+}
